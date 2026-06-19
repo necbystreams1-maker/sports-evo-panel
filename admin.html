@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sports Evo — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:   #1565c0;
+  --blue2:  #0d47a1;
+  --red:    #e53935;
+  --green:  #43b75d;
+  --amber:  #f59e0b;
+  --bg:     #f4f6fb;
+  --card:   #ffffff;
+  --border: #e5e7eb;
+  --text:   #1a1c22;
+  --muted:  #6b7280;
+  --radius: 12px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Topbar ── */
+.topbar {
+  background: var(--blue);
+  color: #fff;
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(21,101,192,0.18);
+}
+.topbar .brand { font-weight: 800; font-size: 17px; letter-spacing: -0.3px; }
+.topbar .brand span { opacity: 0.65; font-weight: 500; font-size: 13px; margin-left: 6px; }
+.topbar .save-btn {
+  background: #fff;
+  color: var(--blue);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.topbar .save-btn:hover { background: #e3ecfa; }
+.topbar .save-btn.saved { background: var(--green); color: #fff; }
+
+/* ── Layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  min-height: calc(100vh - 56px);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.12s;
+}
+.sidebar-item:hover { color: var(--blue); background: #f0f6ff; }
+.sidebar-item.active { color: var(--blue); background: #edf4ff; border-left-color: var(--blue); }
+.sidebar-item .ico { font-size: 16px; }
+.sidebar-section {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 14px 20px 4px 20px;
+}
+
+/* ── Content ── */
+.content {
+  padding: 28px;
+  max-width: 860px;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .badge {
+  background: #edf4ff;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── Form elements ── */
+label { font-size: 12.5px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 5px; }
+input[type=text], input[type=url], textarea, select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--text);
+  background: #f9fafc;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 14px;
+}
+input[type=text]:focus, input[type=url]:focus, textarea:focus { border-color: var(--blue); background: #fff; }
+textarea { resize: vertical; min-height: 90px; font-family: 'SF Mono', Consolas, monospace; font-size: 12px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ── Toggle ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 13.5px; font-weight: 600; }
+.toggle-desc { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; inset: 0;
+  background: #d1d5db;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 3px; bottom: 3px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.switch input:checked + .slider { background: var(--blue); }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+
+/* ── Redirect table ── */
+.redirect-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.redirect-table th { text-align: left; padding: 8px 10px; font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; background: #f9fafc; border-bottom: 1px solid var(--border); }
+.redirect-table td { padding: 9px 10px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+.redirect-table tr:last-child td { border-bottom: none; }
+.redirect-table input[type=text] { margin-bottom: 0; padding: 6px 10px; font-size: 12px; }
+.del-btn { background: none; border: none; color: #e53935; cursor: pointer; font-size: 17px; padding: 2px 6px; border-radius: 6px; }
+.del-btn:hover { background: #fee2e2; }
+.add-btn {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.add-btn:hover { background: var(--blue2); }
+.add-btn.green { background: var(--green); }
+.add-btn.green:hover { background: #349f4b; }
+
+/* ── Info box ── */
+.info-box {
+  background: #edf4ff;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #1a4f9a;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.info-box code {
+  background: #d0e4f8;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 12px;
+  font-family: 'SF Mono', Consolas, monospace;
+}
+
+/* ── JSON output ── */
+.json-out-wrap { position: relative; }
+.json-out {
+  width: 100%;
+  background: #0d1117;
+  color: #adbac7;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  min-height: 120px;
+  resize: vertical;
+  margin-bottom: 0;
+}
+.copy-json-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: #30363d;
+  color: #adbac7;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.copy-json-btn:hover { background: #4a5568; color: #fff; }
+
+/* ── Pill tabs ── */
+.pill-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.pill-tab {
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.pill-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+/* ── Status indicator ── */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--amber); }
+.status-dot.ok { background: var(--green); }
+.status-dot.err { background: var(--red); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  background: #111827;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .content { padding: 16px; }
+  .row-2, .row-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">⚡ Sports Evo <span>Admin Panel</span></div>
+  <button class="save-btn" id="save-btn" onclick="saveConfig()">💾 Save &amp; Export</button>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-section">Main</div>
+    <div class="sidebar-item active" data-tab="general"><span class="ico">⚙️</span> General</div>
+    <div class="sidebar-item" data-tab="banners"><span class="ico">📣</span> Banners</div>
+    <div class="sidebar-item" data-tab="sources"><span class="ico">🔗</span> Data Sources</div>
+    <div class="sidebar-section">Matches</div>
+    <div class="sidebar-item" data-tab="redirects"><span class="ico">↪️</span> Redirects</div>
+    <div class="sidebar-item" data-tab="custom"><span class="ico">✏️</span> Custom Matches</div>
+    <div class="sidebar-section">Deploy</div>
+    <div class="sidebar-item" data-tab="export"><span class="ico">📦</span> Export Config</div>
+    <div class="sidebar-item" data-tab="guide"><span class="ico">📖</span> Setup Guide</div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="content">
+
+    <!-- ── GENERAL ── -->
+    <div class="tab-panel active" id="tab-general">
+      <div class="card">
+        <div class="card-title">🏷️ Widget Identity</div>
+        <label>Brand Name (shown in card footer)</label>
+        <input type="text" id="cfg-brandName" value="Sports Evo" />
+        <label>Fallback Redirect URL (shown when match is finished)</label>
+        <input type="url" id="cfg-fallbackRedirectUrl" value="https://t.me/hellosportslive/9" />
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔀 Auto Redirect Mode</div>
+        <label>Mode</label>
+        <select id="cfg-autoRedirectMode" onchange="updateRedirectModeUI()">
+          <option value="none">None — use URLs as-is</option>
+          <option value="domain_replace">Domain Replace — swap host with your blog</option>
+          <option value="dynamic_page">Dynamic Page — pass stream URL to a player page</option>
+        </select>
+        <div id="mode-domain" style="display:none">
+          <label>Your Blog Domain (e.g. schkjvc.blogspot.com)</label>
+          <input type="text" id="cfg-myBlogDomain" value="" />
+        </div>
+        <div id="mode-dynamic" style="display:none">
+          <label>Dynamic Player Page URL</label>
+          <input type="url" id="cfg-dynamicPlayerPage" value="" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BANNERS ── -->
+    <div class="tab-panel" id="tab-banners">
+      <div class="card">
+        <div class="card-title">💬 WhatsApp Banner</div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Show WhatsApp Banner</div>
+            <div class="toggle-desc">Display the green WhatsApp join button in the widget</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="cfg-whatsappVisible" checked /><span class="slider"></span></label>
+        </div>
+        <br/>
+        <label>WhatsApp Channel / Group URL</label>
+        <input type="url" id="cfg-whatsappUrl" value="https://whatsapp.com/channel/0029Vb6vbGY7dmeVPxhTDm38" />
+      </div>
+
+      <div class="card">
+        <div class="card-title">📤 Telegram Banner</div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Show Telegram Banner</div>
+            <div class="toggle-desc">Display the blue Telegram join button in the widget</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="cfg-telegramVisible" checked /><span class="slider"></span></label>
+        </div>
+        <br/>
+        <label>Telegram Channel / Group URL</label>
+        <input type="url" id="cfg-telegramUrl" value="https://t.me/+igpX8DHoBqo4YWY1" />
+      </div>
+    </div>
+
+    <!-- ── SOURCES ── -->
+    <div class="tab-panel" id="tab-sources">
+      <div class="card">
+        <div class="card-title">🌐 API &amp; JSON Sources</div>
+        <div class="info-box">
+          These are the raw data sources. Change only if you have your own API or forked the JSON files.
+        </div>
+        <label>Main API URL</label>
+        <input type="url" id="cfg-apiUrl" value="https://app.techo.sbs/" />
+        <label>Selected Matches JSON URL</label>
+        <input type="url" id="cfg-selectedMatchesJson" value="https://raw.githubusercontent.com/LordAtomic/Api/main/selected-matches.json" />
+        <label>Custom Matches JSON URL</label>
+        <input type="url" id="cfg-customMatchesJson" value="https://raw.githubusercontent.com/LordAtomic/Api/main/custom-matches.json" />
+      </div>
+    </div>
+
+    <!-- ── REDIRECTS ── -->
+    <div class="tab-panel" id="tab-redirects">
+      <div class="card">
+        <div class="card-title">↪️ Match URL Redirects <span class="badge">per match</span></div>
+        <div class="info-box">
+          Enter a Match ID (from the API) and the stream URL you want it to open. This overrides whatever the API provides. Leave URL empty to use API default.
+        </div>
+        <table class="redirect-table">
+          <thead>
+            <tr>
+              <th>Match ID</th>
+              <th>Stream URL</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="redirects-body"></tbody>
+        </table>
+        <button class="add-btn" onclick="addRedirectRow()">＋ Add Redirect</button>
+      </div>
+    </div>
+
+    <!-- ── CUSTOM MATCHES ── -->
+    <div class="tab-panel" id="tab-custom">
+      <div class="card">
+        <div class="card-title">✏️ Custom Matches <span class="badge">manual entries</span></div>
+        <div class="info-box">
+          Add matches that aren't in the API. Times can be in IST (set timezone field to <code>IST</code>) or UTC (leave empty / set to <code>UTC</code>). Format: <code>YYYY-MM-DDTHH:MM</code>
+        </div>
+        <div id="custom-matches-list"></div>
+        <button class="add-btn green" onclick="addCustomMatchRow()">＋ Add Custom Match</button>
+      </div>
+    </div>
+
+    <!-- ── EXPORT ── -->
+    <div class="tab-panel" id="tab-export">
+      <div class="card">
+        <div class="card-title">📦 Generated Config JSON</div>
+        <div class="info-box">
+          Copy this JSON and commit it to your GitHub repo as <code>sports-evo-config.json</code>. The widget fetches it on every load. No server needed — GitHub raw URLs work perfectly.
+        </div>
+        <div class="json-out-wrap">
+          <textarea class="json-out" id="json-output" readonly rows="22"></textarea>
+          <button class="copy-json-btn" onclick="copyJSON()">Copy</button>
+        </div>
+        <br/>
+        <button class="add-btn" onclick="generateJSON()">🔄 Refresh JSON</button>
+        <button class="add-btn" onclick="downloadJSON()" style="margin-left:8px;background:var(--green)">⬇ Download JSON</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🌍 GitHub Raw URL for Widget</div>
+        <div class="info-box">
+          After uploading <code>sports-evo-config.json</code> to your GitHub repo, paste the raw URL into the widget's <code>ADMIN_CONFIG_URL</code> constant at the top of <code>widget.html</code>.<br/><br/>
+          Raw URL pattern:<br/>
+          <code>https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/sports-evo-config.json</code>
+        </div>
+        <label>Your GitHub Raw Config URL (for reference)</label>
+        <input type="url" id="cfg-rawConfigUrl" placeholder="https://raw.githubusercontent.com/..." />
+      </div>
+    </div>
+
+    <!-- ── GUIDE ── -->
+    <div class="tab-panel" id="tab-guide">
+      <div class="card">
+        <div class="card-title">📖 Quick Setup Guide</div>
+        <div style="line-height:1.85;font-size:13.5px;color:#374151;">
+          <p><b>Step 1 — Fork or create a GitHub repo</b><br/>
+          Create a public GitHub repo (e.g. <code>sports-evo-api</code>) under your account.</p><br/>
+          <p><b>Step 2 — Enable GitHub Pages</b><br/>
+          Go to repo Settings → Pages → Source: <em>Deploy from branch → main → / (root)</em>. Save.</p><br/>
+          <p><b>Step 3 — Upload this admin panel</b><br/>
+          Commit <code>admin.html</code> to the repo root. Access it at:<br/>
+          <code>https://YOUR_USERNAME.github.io/YOUR_REPO/admin.html</code></p><br/>
+          <p><b>Step 4 — Configure &amp; export</b><br/>
+          Fill in all settings in this panel. Click <em>Save &amp; Export</em>, then download <code>sports-evo-config.json</code> and commit it to the repo root.</p><br/>
+          <p><b>Step 5 — Point the widget</b><br/>
+          In <code>widget.html</code>, set:<br/>
+          <code>const ADMIN_CONFIG_URL = 'https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/sports-evo-config.json';</code></p><br/>
+          <p><b>Step 6 — Add redirects for matches</b><br/>
+          Go to the <em>Redirects</em> tab. Add match IDs (from the API) and their stream URLs. Save &amp; commit the new JSON.</p><br/>
+          <p><b>Updating later</b><br/>
+          Just open the admin panel, make changes, download the JSON, and commit. The widget picks up changes within 30 seconds.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+let redirectRows = [];     // [{id, url}]
+let customMatches = [];    // [{...}]
+
+// ── Sidebar navigation ─────────────────────────────────────────────────
+document.querySelectorAll('.sidebar-item[data-tab]').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    if (this.dataset.tab === 'export') generateJSON();
+  });
+});
+
+// ── Redirect rows ──────────────────────────────────────────────────────
+function addRedirectRow(id='', url='') {
+  const uid = Date.now() + Math.random();
+  redirectRows.push({ uid, id, url });
+  renderRedirects();
+}
+
+function removeRedirectRow(uid) {
+  redirectRows = redirectRows.filter(r => r.uid !== uid);
+  renderRedirects();
+}
+
+function renderRedirects() {
+  const tbody = document.getElementById('redirects-body');
+  tbody.innerHTML = redirectRows.map(r => `
+    <tr data-uid="${r.uid}">
+      <td><input type="text" placeholder="Match ID (e.g. 12345)" value="${escHtml(r.id)}" oninput="updateRedirect(${r.uid},'id',this.value)" /></td>
+      <td><input type="text" placeholder="https://stream.example.com/live" value="${escHtml(r.url)}" oninput="updateRedirect(${r.uid},'url',this.value)" /></td>
+      <td><button class="del-btn" onclick="removeRedirectRow(${r.uid})">✕</button></td>
+    </tr>`).join('');
+}
+
+function updateRedirect(uid, field, val) {
+  const r = redirectRows.find(r => r.uid === uid);
+  if (r) r[field] = val;
+}
+
+// ── Custom matches ─────────────────────────────────────────────────────
+function addCustomMatchRow(data={}) {
+  const uid = Date.now() + Math.random();
+  customMatches.push({
+    uid,
+    id: data.id || '',
+    team1Name: data.team1Name || '',
+    team1Logo: data.team1Logo || '',
+    team2Name: data.team2Name || '',
+    team2Logo: data.team2Logo || '',
+    startTime: data.startTime || '',
+    endTime:   data.endTime   || '',
+    timezone:  data.timezone  || 'IST',
+    league:    data.league    || '',
+    round:     data.round     || '',
+    url:       data.url       || '',
+    sport:     data.sport     || 'football',
+    format:    data.format    || '',
+  });
+  renderCustomMatches();
+}
+
+function removeCustomMatch(uid) {
+  customMatches = customMatches.filter(m => m.uid !== uid);
+  renderCustomMatches();
+}
+
+function renderCustomMatches() {
+  const container = document.getElementById('custom-matches-list');
+  container.innerHTML = customMatches.map(m => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px;background:#f9fafc;" data-uid="${m.uid}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <b style="font-size:13px;">Custom Match</b>
+        <button class="del-btn" onclick="removeCustomMatch(${m.uid})">✕ Remove</button>
+      </div>
+      <div class="row-2">
+        <div>
+          <label>Home Team Name</label>
+          <input type="text" value="${escHtml(m.team1Name)}" oninput="updateCustom(${m.uid},'team1Name',this.value)" placeholder="e.g. India" />
+        </div>
+        <div>
+          <label>Away Team Name</label>
+          <input type="text" value="${escHtml(m.team2Name)}" oninput="updateCustom(${m.uid},'team2Name',this.value)" placeholder="e.g. Australia" />
+        </div>
+      </div>
+      <div class="row-2">
+        <div>
+          <label>Home Logo URL</label>
+          <input type="url" value="${escHtml(m.team1Logo)}" oninput="updateCustom(${m.uid},'team1Logo',this.value)" placeholder="https://..." />
+        </div>
+        <div>
+          <label>Away Logo URL</label>
+          <input type="url" value="${escHtml(m.team2Logo)}" oninput="updateCustom(${m.uid},'team2Logo',this.value)" placeholder="https://..." />
+        </div>
+      </div>
+      <div class="row-3">
+        <div>
+          <label>Start Time</label>
+          <input type="text" value="${escHtml(m.startTime)}" oninput="updateCustom(${m.uid},'startTime',this.value)" placeholder="2025-06-20T18:30" />
+        </div>
+        <div>
+          <label>End Time</label>
+          <input type="text" value="${escHtml(m.endTime)}" oninput="updateCustom(${m.uid},'endTime',this.value)" placeholder="2025-06-20T23:00" />
+        </div>
+        <div>
+          <label>Timezone</label>
+          <select onchange="updateCustom(${m.uid},'timezone',this.value)" style="margin-bottom:0">
+            <option value="IST" ${m.timezone==='IST'?'selected':''}>IST (India)</option>
+            <option value="UTC" ${m.timezone==='UTC'?'selected':''}>UTC</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-3">
+        <div>
+          <label>League</label>
+          <input type="text" value="${escHtml(m.league)}" oninput="updateCustom(${m.uid},'league',this.value)" placeholder="IPL, ISL..." />
+        </div>
+        <div>
+          <label>Round / Format</label>
+          <input type="text" value="${escHtml(m.round)}" oninput="updateCustom(${m.uid},'round',this.value)" placeholder="Final, T20..." />
+        </div>
+        <div>
+          <label>Sport</label>
+          <select onchange="updateCustom(${m.uid},'sport',this.value)" style="margin-bottom:0">
+            <option value="football"  ${m.sport==='football'?'selected':''}>Football</option>
+            <option value="cricket"   ${m.sport==='cricket'?'selected':''}>Cricket</option>
+          </select>
+        </div>
+      </div>
+      <label>Stream URL</label>
+      <input type="url" value="${escHtml(m.url)}" oninput="updateCustom(${m.uid},'url',this.value)" placeholder="https://..." style="margin-bottom:0" />
+    </div>`).join('');
+}
+
+function updateCustom(uid, field, val) {
+  const m = customMatches.find(m => m.uid === uid);
+  if (m) m[field] = val;
+}
+
+// ── Redirect mode UI ───────────────────────────────────────────────────
+function updateRedirectModeUI() {
+  const mode = document.getElementById('cfg-autoRedirectMode').value;
+  document.getElementById('mode-domain').style.display  = mode === 'domain_replace' ? '' : 'none';
+  document.getElementById('mode-dynamic').style.display = mode === 'dynamic_page'   ? '' : 'none';
+}
+
+// ── Build config object ────────────────────────────────────────────────
+function buildConfig() {
+  const redirects = {};
+  redirectRows.forEach(r => { if (r.id.trim()) redirects[r.id.trim()] = r.url.trim(); });
+
+  const cleanCustom = customMatches.map(m => {
+    const c = { ...m };
+    delete c.uid;
+    return c;
+  });
+
+  return {
+    brandName:            document.getElementById('cfg-brandName').value.trim(),
+    fallbackRedirectUrl:  document.getElementById('cfg-fallbackRedirectUrl').value.trim(),
+    apiUrl:               document.getElementById('cfg-apiUrl').value.trim(),
+    selectedMatchesJson:  document.getElementById('cfg-selectedMatchesJson').value.trim(),
+    customMatchesJson:    document.getElementById('cfg-customMatchesJson').value.trim(),
+    whatsappUrl:          document.getElementById('cfg-whatsappUrl').value.trim(),
+    telegramUrl:          document.getElementById('cfg-telegramUrl').value.trim(),
+    whatsappVisible:      document.getElementById('cfg-whatsappVisible').checked,
+    telegramVisible:      document.getElementById('cfg-telegramVisible').checked,
+    autoRedirectMode:     document.getElementById('cfg-autoRedirectMode').value,
+    myBlogDomain:         document.getElementById('cfg-myBlogDomain').value.trim(),
+    dynamicPlayerPage:    document.getElementById('cfg-dynamicPlayerPage').value.trim(),
+    redirects,
+    customMatchesInline:  cleanCustom,
+    _generated:           new Date().toISOString(),
+  };
+}
+
+// ── Generate JSON ──────────────────────────────────────────────────────
+function generateJSON() {
+  const cfg = buildConfig();
+  document.getElementById('json-output').value = JSON.stringify(cfg, null, 2);
+}
+
+function copyJSON() {
+  const ta = document.getElementById('json-output');
+  ta.select();
+  document.execCommand('copy');
+  toast('Copied to clipboard!');
+}
+
+function downloadJSON() {
+  generateJSON();
+  const cfg = document.getElementById('json-output').value;
+  const blob = new Blob([cfg], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sports-evo-config.json';
+  a.click();
+}
+
+// ── Save (localStorage for session persistence) ────────────────────────
+function saveConfig() {
+  generateJSON();
+  const cfg = buildConfig();
+  try { localStorage.setItem('sports-evo-admin', JSON.stringify(cfg)); } catch(e){}
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '✅ Saved!';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = '💾 Save & Export'; btn.classList.remove('saved'); }, 2200);
+  toast('Config saved! Download the JSON and commit to GitHub.');
+}
+
+// ── Load from localStorage ─────────────────────────────────────────────
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem('sports-evo-admin');
+    if (!raw) return;
+    const cfg = JSON.parse(raw);
+    if (cfg.brandName !== undefined)           document.getElementById('cfg-brandName').value = cfg.brandName;
+    if (cfg.fallbackRedirectUrl !== undefined) document.getElementById('cfg-fallbackRedirectUrl').value = cfg.fallbackRedirectUrl;
+    if (cfg.apiUrl !== undefined)              document.getElementById('cfg-apiUrl').value = cfg.apiUrl;
+    if (cfg.selectedMatchesJson !== undefined) document.getElementById('cfg-selectedMatchesJson').value = cfg.selectedMatchesJson;
+    if (cfg.customMatchesJson !== undefined)   document.getElementById('cfg-customMatchesJson').value = cfg.customMatchesJson;
+    if (cfg.whatsappUrl !== undefined)         document.getElementById('cfg-whatsappUrl').value = cfg.whatsappUrl;
+    if (cfg.telegramUrl !== undefined)         document.getElementById('cfg-telegramUrl').value = cfg.telegramUrl;
+    if (cfg.whatsappVisible !== undefined)     document.getElementById('cfg-whatsappVisible').checked = cfg.whatsappVisible;
+    if (cfg.telegramVisible !== undefined)     document.getElementById('cfg-telegramVisible').checked = cfg.telegramVisible;
+    if (cfg.autoRedirectMode !== undefined)    { document.getElementById('cfg-autoRedirectMode').value = cfg.autoRedirectMode; updateRedirectModeUI(); }
+    if (cfg.myBlogDomain !== undefined)        document.getElementById('cfg-myBlogDomain').value = cfg.myBlogDomain;
+    if (cfg.dynamicPlayerPage !== undefined)   document.getElementById('cfg-dynamicPlayerPage').value = cfg.dynamicPlayerPage;
+
+    if (cfg.redirects) {
+      Object.entries(cfg.redirects).forEach(([id, url]) => addRedirectRow(id, url));
+    }
+    if (cfg.customMatchesInline && Array.isArray(cfg.customMatchesInline)) {
+      cfg.customMatchesInline.forEach(m => addCustomMatchRow(m));
+    }
+  } catch(e) { console.warn('Could not load saved config:', e); }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
+loadSaved();
+updateRedirectModeUI();
+</script>
+</body>
+</html>
