@@ -1,0 +1,17 @@
+{
+  "brandName": "Sports Evo",
+  "fallbackRedirectUrl": "https://t.me/hellosportslive/9",
+  "apiUrl": "https://app.techo.sbs/",
+  "selectedMatchesJson": "https://raw.githubusercontent.com/LordAtomic/Api/main/selected-matches.json",
+  "customMatchesJson": "https://raw.githubusercontent.com/LordAtomic/Api/main/custom-matches.json",
+  "whatsappUrl": "https://whatsapp.com/channel/0029Vb6vbGY7dmeVPxhTDm38",
+  "telegramUrl": "https://t.me/+igpX8DHoBqo4YWY1",
+  "whatsappVisible": true,
+  "telegramVisible": true,
+  "autoRedirectMode": "none",
+  "myBlogDomain": "",
+  "dynamicPlayerPage": "",
+  "redirects": {},
+  "customMatchesInline": [],
+  "_generated": "2026-06-19T16:52:47.070Z"
+}
